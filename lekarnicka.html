@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedBox · Rodinná lékárnička</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Lora:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #0b0f18;
+  --bg2:       #111827;
+  --card:      #161d2e;
+  --card2:     #1e2840;
+  --border:    rgba(255,255,255,0.07);
+  --border2:   rgba(255,255,255,0.12);
+  --text:      #e8edf5;
+  --muted:     #6b7b99;
+  --muted2:    #8a9bc0;
+  --accent:    #3ecf8e;
+  --accent2:   #2ab876;
+  --accent-bg: rgba(62,207,142,0.1);
+  --danger:    #f87171;
+  --danger-bg: rgba(248,113,113,0.1);
+  --warn:      #fbbf24;
+  --warn-bg:   rgba(251,191,36,0.1);
+  --info:      #60a5fa;
+  --info-bg:   rgba(96,165,250,0.1);
+  --radius:    14px;
+  --radius-sm: 8px;
+  --shadow:    0 4px 24px rgba(0,0,0,0.4);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,0.6);
+  --glow:      0 0 20px rgba(62,207,142,0.15);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Sora',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  font-size:14px;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(62,207,142,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(96,165,250,0.05) 0%, transparent 60%);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--card2);border-radius:3px;}
+
+/* ── Header ── */
+header{
+  background:rgba(11,15,24,0.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  height:68px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;
+  position:sticky;top:0;z-index:100;
+}
+.logo{
+  display:flex;align-items:center;gap:12px;
+  font-family:'Lora',serif;font-size:20px;font-weight:600;
+  color:var(--text);letter-spacing:-.3px;
+}
+.logo-icon{
+  width:38px;height:38px;
+  background:linear-gradient(135deg,var(--accent),#1aab72);
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;box-shadow:0 4px 12px rgba(62,207,142,0.3);
+}
+.logo span.sub{font-size:12px;color:var(--muted);font-family:'Sora',sans-serif;font-weight:400;margin-top:1px;display:block;}
+.header-right{display:flex;gap:8px;align-items:center;}
+
+/* ── Buttons ── */
+.btn{
+  border:none;cursor:pointer;font-family:'Sora',sans-serif;
+  font-size:13px;font-weight:500;border-radius:var(--radius-sm);
+  padding:9px 18px;transition:all .18s;display:inline-flex;align-items:center;gap:6px;
+  white-space:nowrap;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--accent),#2ab876);
+  color:#0b0f18;font-weight:600;
+  box-shadow:0 4px 14px rgba(62,207,142,0.25);
+}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(62,207,142,0.35);}
+.btn-ghost{background:var(--card);color:var(--muted2);border:1px solid var(--border2);}
+.btn-ghost:hover{background:var(--card2);color:var(--text);border-color:var(--border2);}
+.btn-danger{background:var(--danger-bg);color:var(--danger);border:1px solid rgba(248,113,113,0.2);}
+.btn-danger:hover{background:rgba(248,113,113,0.2);}
+.btn-sm{padding:6px 12px;font-size:12px;}
+.btn-icon{
+  width:32px;height:32px;padding:0;border:1px solid var(--border2);
+  background:transparent;color:var(--muted);border-radius:var(--radius-sm);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:14px;transition:all .15s;
+}
+.btn-icon:hover{background:var(--card2);color:var(--text);border-color:var(--border2);}
+
+/* ── Main ── */
+main{max-width:1100px;margin:0 auto;padding:28px 20px;}
+
+/* ── Dashboard stats ── */
+.dashboard{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:12px;margin-bottom:28px;
+}
+@media(max-width:700px){.dashboard{grid-template-columns:repeat(2,1fr);}}
+.stat-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:18px 20px;
+  transition:border-color .2s;position:relative;overflow:hidden;
+}
+.stat-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--c1,transparent) 0%,transparent 60%);
+  opacity:.06;pointer-events:none;
+}
+.stat-card:hover{border-color:var(--border2);}
+.stat-card.c-green{--c1:var(--accent);}
+.stat-card.c-red{--c1:var(--danger);}
+.stat-card.c-yellow{--c1:var(--warn);}
+.stat-card.c-blue{--c1:var(--info);}
+.stat-num{font-size:32px;font-weight:700;font-family:'Lora',serif;line-height:1;}
+.stat-num.green{color:var(--accent);}
+.stat-num.red{color:var(--danger);}
+.stat-num.yellow{color:var(--warn);}
+.stat-num.blue{color:var(--info);}
+.stat-label{font-size:12px;color:var(--muted);margin-top:6px;font-weight:400;}
+
+/* ── Alert banners ── */
+.alerts{display:flex;flex-direction:column;gap:8px;margin-bottom:20px;}
+.alert-bar{
+  border-radius:var(--radius);padding:14px 18px;
+  display:flex;align-items:flex-start;gap:12px;
+  animation:slideIn .3s ease;
+}
+@keyframes slideIn{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+.alert-expired{background:var(--danger-bg);border:1px solid rgba(248,113,113,0.25);}
+.alert-expiring{background:var(--warn-bg);border:1px solid rgba(251,191,36,0.25);}
+.alert-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.alert-content h4{font-size:13px;font-weight:600;margin-bottom:4px;}
+.alert-expired .alert-content h4{color:var(--danger);}
+.alert-expiring .alert-content h4{color:var(--warn);}
+.alert-content ul{font-size:12px;color:var(--muted2);padding-left:14px;}
+.alert-content li{margin-bottom:2px;}
+
+/* ── Toolbar ── */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}
+.search-wrap{flex:1;min-width:200px;position:relative;}
+.search-wrap input{
+  width:100%;padding:10px 14px 10px 40px;
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:var(--radius-sm);color:var(--text);
+  font-family:'Sora',sans-serif;font-size:13px;outline:none;
+  transition:border-color .15s;
+}
+.search-wrap input::placeholder{color:var(--muted);}
+.search-wrap input:focus{border-color:var(--accent);}
+.search-wrap .si{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:15px;}
+
+.filter-select{
+  padding:9px 12px;background:var(--card);border:1px solid var(--border2);
+  border-radius:var(--radius-sm);color:var(--text);font-family:'Sora',sans-serif;
+  font-size:13px;outline:none;cursor:pointer;
+}
+.filter-select:focus{border-color:var(--accent);}
+.filter-select option{background:var(--bg2);}
+
+/* ── Status tabs ── */
+.status-tabs{display:flex;gap:4px;margin-bottom:20px;flex-wrap:wrap;}
+.stab{
+  padding:7px 14px;border-radius:20px;font-size:12px;font-weight:500;
+  cursor:pointer;border:1px solid var(--border);background:transparent;
+  color:var(--muted);transition:all .15s;user-select:none;
+}
+.stab:hover{border-color:var(--border2);color:var(--muted2);}
+.stab.active-all{background:var(--card2);border-color:var(--border2);color:var(--text);}
+.stab.active-ok{background:var(--accent-bg);border-color:rgba(62,207,142,.3);color:var(--accent);}
+.stab.active-warn{background:var(--warn-bg);border-color:rgba(251,191,36,.3);color:var(--warn);}
+.stab.active-exp{background:var(--danger-bg);border-color:rgba(248,113,113,.3);color:var(--danger);}
+
+/* ── Tag chips ── */
+.tag-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;}
+.tchip{
+  padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;
+  cursor:pointer;border:1px solid var(--border);background:transparent;
+  color:var(--muted);transition:all .12s;user-select:none;
+}
+.tchip:hover{border-color:var(--border2);color:var(--muted2);}
+.tchip.active{color:#fff;}
+
+/* ── Grid ── */
+.med-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:14px;
+}
+
+/* ── Medicine card ── */
+.med-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;
+  transition:all .2s;position:relative;overflow:hidden;
+  animation:cardIn .3s ease backwards;
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.med-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:var(--shadow);}
+.med-card.s-expired{border-left:3px solid var(--danger);}
+.med-card.s-expiring{border-left:3px solid var(--warn);}
+.med-card.s-ok{border-left:3px solid var(--accent);}
+.med-card.s-archived{opacity:.55;border-left:3px solid var(--muted);}
+
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.med-name{
+  font-family:'Lora',serif;font-size:16px;font-weight:500;
+  color:var(--text);line-height:1.3;flex:1;margin-right:8px;
+}
+.card-btns{display:flex;gap:4px;flex-shrink:0;}
+
+.status-pill{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:600;padding:3px 10px;
+  border-radius:20px;letter-spacing:.3px;margin-bottom:12px;
+  text-transform:uppercase;
+}
+.sp-ok{background:var(--accent-bg);color:var(--accent);}
+.sp-warn{background:var(--warn-bg);color:var(--warn);}
+.sp-exp{background:var(--danger-bg);color:var(--danger);}
+.sp-arch{background:rgba(107,123,153,0.15);color:var(--muted);}
+
+.card-info{display:flex;flex-direction:column;gap:7px;}
+.info-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted2);}
+.info-row .lbl{color:var(--muted);font-weight:500;min-width:72px;}
+.info-row .val{color:var(--text);}
+.val-danger{color:var(--danger)!important;font-weight:600;}
+.val-warn{color:var(--warn)!important;font-weight:600;}
+
+.qty-chip{
+  font-size:11px;font-weight:600;padding:2px 8px;
+  border-radius:20px;display:inline-flex;align-items:center;
+}
+.qc-ok{background:var(--accent-bg);color:var(--accent);}
+.qc-low{background:var(--warn-bg);color:var(--warn);}
+.qc-empty{background:var(--danger-bg);color:var(--danger);}
+
+.card-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:12px;}
+.mini-tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;}
+
+.card-notes{
+  margin-top:12px;padding-top:12px;
+  border-top:1px solid var(--border);
+  font-size:12px;color:var(--muted);font-style:italic;line-height:1.5;
+}
+
+/* ── Empty ── */
+.empty{
+  grid-column:1/-1;text-align:center;padding:70px 20px;
+  color:var(--muted);
+}
+.empty .ei{font-size:48px;margin-bottom:16px;opacity:.5;}
+.empty h3{font-family:'Lora',serif;font-size:20px;color:var(--muted2);margin-bottom:8px;}
+.empty p{font-size:13px;}
+
+/* ── Section header ── */
+.section-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;
+}
+.section-title{
+  font-size:12px;font-weight:600;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.8px;
+  display:flex;align-items:center;gap:8px;
+}
+.section-title::before{content:'';display:block;width:3px;height:14px;background:var(--accent);border-radius:2px;}
+
+/* ── Shopping list panel ── */
+.shop-panel{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;margin-bottom:24px;
+}
+.shop-panel h3{
+  font-family:'Lora',serif;font-size:16px;margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;color:var(--text);
+}
+.shop-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;
+}
+.shop-item:last-child{border-bottom:none;}
+.shop-name{font-weight:500;}
+.shop-qty{font-size:12px;color:var(--muted);margin-top:2px;}
+.copy-btn{margin-top:12px;}
+
+/* ── Modal ── */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);
+  backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;
+  z-index:200;padding:16px;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.modal-bg.open{opacity:1;pointer-events:all;}
+.modal{
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:18px;width:100%;max-width:540px;
+  max-height:92vh;overflow-y:auto;padding:28px;
+  box-shadow:var(--shadow-lg);
+  transform:translateY(20px) scale(.97);transition:transform .2s;
+}
+.modal-bg.open .modal{transform:translateY(0) scale(1);}
+.modal-title{
+  font-family:'Lora',serif;font-size:22px;font-weight:600;
+  margin-bottom:24px;color:var(--text);
+  display:flex;align-items:center;gap:10px;
+}
+.modal-title .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);flex-shrink:0;}
+
+/* ── Form ── */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.ff{display:flex;flex-direction:column;gap:5px;}
+.ff.full{grid-column:1/-1;}
+.ff label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.ff input,.ff select,.ff textarea{
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:var(--radius-sm);padding:10px 13px;
+  font-family:'Sora',sans-serif;font-size:13px;color:var(--text);outline:none;
+  transition:border-color .15s;
+}
+.ff input::placeholder,.ff textarea::placeholder{color:var(--muted);}
+.ff input:focus,.ff select:focus,.ff textarea:focus{border-color:var(--accent);}
+.ff select option{background:var(--bg2);}
+.ff textarea{resize:vertical;min-height:72px;}
+
+.tag-toggles{display:flex;gap:6px;flex-wrap:wrap;}
+.ttog{
+  padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;
+  cursor:pointer;border:1.5px solid var(--border2);
+  background:transparent;transition:all .12s;user-select:none;color:var(--muted2);
+}
+.ttog.on{color:#fff;}
+
+.form-actions{
+  display:flex;justify-content:flex-end;gap:8px;
+  margin-top:24px;padding-top:20px;border-top:1px solid var(--border);
+}
+
+/* ── Settings ── */
+.sset-section{margin-bottom:24px;}
+.sset-section h3{
+  font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.6px;margin-bottom:12px;padding-bottom:8px;
+  border-bottom:1px solid var(--border);
+}
+.sset-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 0;border-bottom:1px solid var(--border);
+}
+.sset-row:last-child{border-bottom:none;}
+.sset-row label{font-size:13px;font-weight:500;}
+.sset-row .hint{font-size:11px;color:var(--muted);margin-top:2px;}
+.sset-row input[type=number]{
+  width:76px;text-align:center;background:var(--card);
+  border:1px solid var(--border2);border-radius:var(--radius-sm);
+  padding:7px;font-size:13px;font-family:'Sora',sans-serif;color:var(--text);outline:none;
+}
+.sset-row input[type=number]:focus{border-color:var(--accent);}
+
+.tag-mgmt{display:flex;flex-direction:column;gap:8px;}
+.tag-mgmt-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 13px;background:var(--card);border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+}
+.tm-name{font-weight:600;font-size:13px;}
+.tm-right{display:flex;align-items:center;gap:6px;}
+.csw{width:20px;height:20px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .1s;}
+.csw.sel{border-color:var(--text);transform:scale(1.2);}
+.add-tag-row{display:flex;gap:8px;margin-top:8px;}
+.add-tag-row input{
+  flex:1;background:var(--card);border:1px solid var(--border2);
+  border-radius:var(--radius-sm);padding:9px 12px;font-size:13px;
+  font-family:'Sora',sans-serif;color:var(--text);outline:none;
+}
+.add-tag-row input:focus{border-color:var(--accent);}
+.add-tag-row input::placeholder{color:var(--muted);}
+
+/* ── Confirm modal ── */
+.conf-body{text-align:center;padding:8px 0 4px;}
+.conf-icon{font-size:40px;margin-bottom:12px;}
+.conf-body h3{font-family:'Lora',serif;font-size:20px;margin-bottom:8px;}
+.conf-body p{font-size:13px;color:var(--muted2);}
+
+/* ── Loader ── */
+.loader{grid-column:1/-1;display:flex;align-items:center;justify-content:center;padding:60px;gap:12px;color:var(--muted);}
+.spinner{width:22px;height:22px;border:2.5px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── Archive toggle ── */
+.arch-toggle{
+  display:flex;align-items:center;gap:8px;font-size:13px;
+  color:var(--muted);cursor:pointer;user-select:none;
+  padding:8px 14px;border-radius:var(--radius-sm);
+  background:var(--card);border:1px solid var(--border);
+  transition:all .15s;
+}
+.arch-toggle:hover{border-color:var(--border2);color:var(--muted2);}
+.arch-toggle.active{color:var(--warn);border-color:rgba(251,191,36,.3);background:var(--warn-bg);}
+
+/* ── Divider ── */
+.divider{height:1px;background:var(--border);margin:24px 0;}
+
+@media(max-width:520px){
+  .fg{grid-template-columns:1fr;}
+  .ff.full{grid-column:1;}
+  header{padding:0 14px;}
+  main{padding:16px 12px;}
+  .dashboard{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<div id="err-box" style="display:none;position:fixed;inset:0;z-index:9999;background:#1a0000;color:#ff6b6b;padding:20px;font-family:monospace;font-size:13px;overflow:auto;white-space:pre-wrap;"></div>
+<script>
+window.onerror = function(msg, src, line, col, err) {
+  var b = document.getElementById('err-box');
+  b.style.display = 'block';
+  b.textContent += '❌ ' + msg + '\n   ' + src + ':' + line + '\n\n';
+};
+window.addEventListener('unhandledrejection', function(e) {
+  var b = document.getElementById('err-box');
+  b.style.display = 'block';
+  b.textContent += '❌ Promise error:\n   ' + (e.reason?.message || e.reason) + '\n   ' + (e.reason?.stack || '') + '\n\n';
+});
+</script>
+<script type="module">
+// ═══════════════════════════════════════════════════
+//  Firebase config — napojeno na coinsafe-d728d
+// ═══════════════════════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyC1s5Q7fitYSkIZquKX4Lhjf3-0qChxcfs",
+  authDomain:        "coinsafe-d728d.firebaseapp.com",
+  projectId:         "coinsafe-d728d",
+  storageBucket:     "coinsafe-d728d.firebasestorage.app",
+  messagingSenderId: "223348282480",
+  appId:             "1:223348282480:web:3098d21eef6f4e5f8950b5"
+};
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, doc, getDocs, addDoc, updateDoc,
+  deleteDoc, setDoc, getDoc, onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ── State ──────────────────────────────────────────
+let db, medicines = [];
+let settings  = { expiryWarningDays: 10, lowQtyThreshold: 3 };
+let tags      = [
+  { name:"Máma", color:"#f472b6" },
+  { name:"Táta", color:"#60a5fa" },
+  { name:"Kuba", color:"#4ade80" }
+];
+let filterTag = null, filterCat = "vše", filterStatus = "vše", searchQ = "";
+let showArchive = false;
+let editingId = null, pendingDeleteId = null, pendingArchiveId = null;
+let formTags = [];
+
+const COLORS = ["#f472b6","#60a5fa","#4ade80","#fb923c","#a78bfa","#34d399","#f87171","#38bdf8","#facc15","#f97316"];
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+// ── Init ──────────────────────────────────────────
+async function init() {
+  const app = initializeApp(FIREBASE_CONFIG);
+  db = getFirestore(app);
+  await Promise.all([loadSettings(), loadTags()]);
+  subscribeToMedicines();
+}
+
+async function loadSettings() {
+  try {
+    const s = await getDoc(doc(db,'settings','global_med'));
+    if (s.exists()) Object.assign(settings, s.data());
+  } catch(e){}
+  $('s-expiry').value   = settings.expiryWarningDays;
+  $('s-lowqty').value   = settings.lowQtyThreshold;
+}
+async function saveSettingsToDB() {
+  if (!db) return;
+  await setDoc(doc(db,'settings','global_med'), settings);
+}
+
+async function loadTags() {
+  try {
+    const t = await getDoc(doc(db,'settings','tags_med'));
+    if (t.exists() && t.data().list) tags = t.data().list;
+  } catch(e){}
+  renderTagRow();
+  renderTagToggles();
+  renderTagMgmt();
+}
+async function saveTagsToDB() {
+  if (!db) return;
+  await setDoc(doc(db,'settings','tags_med'), { list: tags });
+}
+
+function subscribeToMedicines() {
+  onSnapshot(collection(db,'medicines'), snap => {
+    medicines = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    renderAll();
+  });
+}
+
+// ── Date utils ──────────────────────────────────
+function daysLeft(dateStr) {
+  if (!dateStr) return Infinity;
+  return Math.ceil((new Date(dateStr) - new Date()) / 864e5);
+}
+function fmtDate(s) {
+  if (!s) return '—';
+  return new Date(s).toLocaleDateString('cs-CZ',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+function getStatus(m) {
+  if (m.archived) return 'archived';
+  const d = daysLeft(m.expiryDate);
+  if (d < 0) return 'expired';
+  if (d <= settings.expiryWarningDays) return 'expiring';
+  return 'ok';
+}
+
+// ── Render all ──────────────────────────────────
+function renderAll() {
+  renderDashboard();
+  renderAlerts();
+  renderShopList();
+  renderMeds();
+}
+
+function renderDashboard() {
+  const active = medicines.filter(m => !m.archived);
+  const expired  = active.filter(m => getStatus(m) === 'expired').length;
+  const expiring = active.filter(m => getStatus(m) === 'expiring').length;
+  const low = active.filter(m => m.quantity !== null && m.quantity !== undefined && m.quantity <= settings.lowQtyThreshold && m.quantity > 0).length;
+  $('d-total').textContent   = active.length;
+  $('d-expired').textContent  = expired;
+  $('d-expiring').textContent = expiring;
+  $('d-low').textContent      = low;
+}
+
+function renderAlerts() {
+  const active = medicines.filter(m => !m.archived);
+  const expired  = active.filter(m => getStatus(m) === 'expired');
+  const expiring = active.filter(m => getStatus(m) === 'expiring');
+  const eb = $('al-expired'), xb = $('al-expiring');
+  if (expired.length) {
+    eb.style.display='flex';
+    eb.querySelector('.alert-list').innerHTML = expired.map(m =>
+      `<li><strong>${esc(m.name)}</strong> — prošlo ${fmtDate(m.expiryDate)}</li>`).join('');
+  } else eb.style.display='none';
+  if (expiring.length) {
+    xb.style.display='flex';
+    xb.querySelector('.alert-list').innerHTML = expiring.map(m => {
+      const d = daysLeft(m.expiryDate);
+      return `<li><strong>${esc(m.name)}</strong> — vyprší za ${d} ${d===1?'den':d<5?'dny':'dní'} (${fmtDate(m.expiryDate)})</li>`;
+    }).join('');
+  } else xb.style.display='none';
+}
+
+function renderShopList() {
+  const low = medicines.filter(m =>
+    !m.archived && m.quantity !== null && m.quantity !== undefined && m.quantity <= settings.lowQtyThreshold
+  );
+  const panel = $('shop-panel');
+  if (!low.length) { panel.style.display='none'; return; }
+  panel.style.display='block';
+  $('shop-items').innerHTML = low.map(m => {
+    const qc = m.quantity==0 ? 'qc-empty' : 'qc-low';
+    return `<div class="shop-item">
+      <div><div class="shop-name">${esc(m.name)}</div>
+        <div class="shop-qty">${m.category||''}</div></div>
+      <span class="qty-chip ${qc}">${m.quantity??0} ${m.unit||'ks'}</span>
+    </div>`;
+  }).join('');
+}
+
+window.copyShopList = function() {
+  const low = medicines.filter(m =>
+    !m.archived && m.quantity !== null && m.quantity !== undefined && m.quantity <= settings.lowQtyThreshold
+  );
+  const txt = '🛒 Nákupní seznam — lékárnička\n' + low.map(m => `• ${m.name} (zbývá: ${m.quantity??0} ${m.unit||'ks'})`).join('\n');
+  navigator.clipboard.writeText(txt).then(() => {
+    const b = $('copy-shop-btn');
+    b.textContent = '✓ Zkopírováno!';
+    setTimeout(() => b.textContent = '📋 Kopírovat seznam', 2000);
+  });
+};
+
+// ── Filter helpers ───────────────────────────────
+function getFiltered() {
+  return medicines.filter(m => {
+    if (showArchive) { if (!m.archived) return false; }
+    else             { if (m.archived) return false; }
+    if (filterStatus !== 'vše') {
+      const s = getStatus(m);
+      if (filterStatus === 'ok'       && s !== 'ok')       return false;
+      if (filterStatus === 'expiring' && s !== 'expiring') return false;
+      if (filterStatus === 'expired'  && s !== 'expired')  return false;
+    }
+    if (filterTag && !(m.tags||[]).includes(filterTag)) return false;
+    if (filterCat !== 'vše' && m.category !== filterCat) return false;
+    if (searchQ && !m.name.toLowerCase().includes(searchQ.toLowerCase())) return false;
+    return true;
+  });
+}
+
+// ── Render medicines ─────────────────────────────
+function renderMeds() {
+  const grid = $('med-grid');
+  const list = getFiltered();
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty">
+      <div class="ei">${showArchive ? '🗃️' : '💊'}</div>
+      <h3>${showArchive ? 'Archiv je prázdný' : 'Nic nenalezeno'}</h3>
+      <p>${showArchive ? 'Žádné archivované léky.' : 'Zkus změnit filtr nebo přidat lék.'}</p>
+    </div>`;
+    return;
+  }
+  const sorted = [...list].sort((a,b) => {
+    const o = {expired:0,expiring:1,ok:2,archived:3};
+    const sa=o[getStatus(a)], sb=o[getStatus(b)];
+    if (sa!==sb) return sa-sb;
+    return (a.expiryDate||'').localeCompare(b.expiryDate||'');
+  });
+  grid.innerHTML = sorted.map((m,i) => {
+    const status = getStatus(m);
+    const days   = daysLeft(m.expiryDate);
+    const pillMap = {expired:'sp-exp',expiring:'sp-warn',ok:'sp-ok',archived:'sp-arch'};
+    const pillTxt = {expired:'⚠ Prošlé',expiring:'⏳ Brzy vyprší',ok:'✓ V pořádku',archived:'🗃 Archivováno'};
+    const pill = `<span class="status-pill ${pillMap[status]}">${pillTxt[status]}</span>`;
+
+    let expiryVal;
+    if (status==='expired')  expiryVal=`<span class="val val-danger">${fmtDate(m.expiryDate)}</span>`;
+    else if(status==='expiring') expiryVal=`<span class="val val-warn">${fmtDate(m.expiryDate)} · ${days}d</span>`;
+    else expiryVal=`<span class="val">${fmtDate(m.expiryDate)}</span>`;
+
+    const qty = m.quantity;
+    let qtyHtml = '';
+    if (qty !== null && qty !== undefined) {
+      const qc = qty==0?'qc-empty':qty<=settings.lowQtyThreshold?'qc-low':'qc-ok';
+      qtyHtml=`<div class="info-row"><span class="lbl">Množství</span><span class="qty-chip ${qc}">${qty} ${m.unit||'ks'}</span></div>`;
+    }
+
+    const tagsHtml = (m.tags||[]).map(t=>{
+      const td=tags.find(x=>x.name===t)||{color:'#888'};
+      return `<span class="mini-tag" style="background:${td.color}22;color:${td.color}">${t}</span>`;
+    }).join('');
+
+    const archBtn = status!=='archived'
+      ? `<button class="btn-icon" title="Archivovat" onclick="doArchive('${m.id}')">🗃️</button>`
+      : `<button class="btn-icon" title="Obnovit" onclick="doRestore('${m.id}')">♻️</button>`;
+
+    return `<div class="med-card s-${status}" style="animation-delay:${i*0.04}s">
+      <div class="card-top">
+        <div class="med-name">${esc(m.name)}</div>
+        <div class="card-btns">
+          <button class="btn-icon" title="Upravit" onclick="openEdit('${m.id}')">✏️</button>
+          ${archBtn}
+          <button class="btn-icon" title="Smazat" onclick="askDelete('${m.id}')">🗑️</button>
+        </div>
+      </div>
+      ${pill}
+      <div class="card-info">
+        <div class="info-row"><span class="lbl">Expirace</span>${expiryVal}</div>
+        ${m.openedDate?`<div class="info-row"><span class="lbl">Otevřeno</span><span class="val">${fmtDate(m.openedDate)}</span></div>`:''}
+        ${m.category?`<div class="info-row"><span class="lbl">Kategorie</span><span class="val">${esc(m.category)}</span></div>`:''}
+        ${qtyHtml}
+      </div>
+      ${tagsHtml?`<div class="card-tags">${tagsHtml}</div>`:''}
+      ${m.notes?`<div class="card-notes">${esc(m.notes)}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ── Tag row ─────────────────────────────────────
+function renderTagRow() {
+  const el = $('tag-row');
+  el.innerHTML = `<span class="tchip ${!filterTag?'active':''}" data-t="" style="${!filterTag?'background:#3ecf8e22;border-color:rgba(62,207,142,.3);color:var(--accent)':''}">Vše</span>`
+    + tags.map(t=>{
+      const a = filterTag===t.name;
+      const s = a?`background:${t.color}22;border-color:${t.color}44;color:${t.color}`:'';
+      return `<span class="tchip ${a?'active':''}" data-t="${t.name}" style="${s}">${t.name}</span>`;
+    }).join('');
+  el.querySelectorAll('.tchip').forEach(c=>c.onclick=()=>{
+    filterTag = c.dataset.t||null;
+    renderTagRow(); renderMeds(); renderDashboard();
+  });
+}
+
+// ── Tag toggles in form ──────────────────────────
+function renderTagToggles() {
+  const el=$('tag-toggles');
+  if(!el) return;
+  el.innerHTML = tags.map(t=>{
+    const on=formTags.includes(t.name);
+    const s=on?`background:${t.color};border-color:${t.color};color:#fff`:`border-color:${t.color}66;color:${t.color}`;
+    return `<span class="ttog ${on?'on':''}" data-t="${t.name}" style="${s}">${t.name}</span>`;
+  }).join('');
+  el.querySelectorAll('.ttog').forEach(t=>t.onclick=()=>{
+    const n=t.dataset.t;
+    formTags=formTags.includes(n)?formTags.filter(x=>x!==n):[...formTags,n];
+    renderTagToggles();
+  });
+}
+
+// ── Tag management ──────────────────────────────
+function renderTagMgmt() {
+  const el=$('tag-mgmt');
+  if(!el) return;
+  el.innerHTML = tags.map((t,i)=>`
+    <div class="tag-mgmt-row">
+      <span class="tm-name" style="color:${t.color}">${t.name}</span>
+      <div class="tm-right">
+        ${COLORS.map(c=>`<span class="csw ${t.color===c?'sel':''}" style="background:${c}" onclick="setTagColor(${i},'${c}')"></span>`).join('')}
+        <button class="btn-icon btn-sm" onclick="removeTag(${i})">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+window.setTagColor=(i,c)=>{tags[i].color=c;renderTagMgmt();renderTagRow();renderTagToggles();saveTagsToDB();};
+window.removeTag=i=>{tags.splice(i,1);renderTagMgmt();renderTagRow();renderTagToggles();saveTagsToDB();};
+window.addTagInput=()=>{
+  const inp=$('new-tag');const n=inp.value.trim();
+  if(!n||tags.find(t=>t.name===n)) return;
+  tags.push({name:n,color:COLORS[tags.length%COLORS.length]});
+  inp.value='';renderTagMgmt();renderTagRow();renderTagToggles();saveTagsToDB();
+};
+
+// ── Status tabs ─────────────────────────────────
+function renderStatusTabs() {
+  document.querySelectorAll('.stab').forEach(t => {
+    t.className = 'stab';
+    if (t.dataset.s === filterStatus) {
+      const map = {vše:'active-all',ok:'active-ok',expiring:'active-warn',expired:'active-exp'};
+      t.classList.add(map[filterStatus]||'active-all');
+    }
+  });
+}
+
+// ── Open Add ────────────────────────────────────
+window.openAdd = () => {
+  editingId=null; formTags=[];
+  $('mtitle').textContent='Přidat lék';
+  ['m-name','m-expiry','m-opened','m-qty','m-notes'].forEach(id=>$(id).value='');
+  $('m-unit').value='ks'; $('m-cat').value='';
+  renderTagToggles();
+  openModal('modal-med');
+};
+
+// ── Open Edit ───────────────────────────────────
+window.openEdit = id => {
+  const m=medicines.find(x=>x.id===id); if(!m) return;
+  editingId=id; formTags=[...(m.tags||[])];
+  $('mtitle').textContent='Upravit lék';
+  $('m-name').value=m.name||'';
+  $('m-expiry').value=m.expiryDate||'';
+  $('m-opened').value=m.openedDate||'';
+  $('m-qty').value=m.quantity??'';
+  $('m-unit').value=m.unit||'ks';
+  $('m-cat').value=m.category||'';
+  $('m-notes').value=m.notes||'';
+  renderTagToggles();
+  openModal('modal-med');
+};
+
+// ── Save ────────────────────────────────────────
+window.saveMed = async () => {
+  const name=$('m-name').value.trim();
+  if (!name) { $('m-name').focus(); return; }
+  const data={
+    name,
+    expiryDate:$('m-expiry').value||null,
+    openedDate:$('m-opened').value||null,
+    quantity:$('m-qty').value!==''?Number($('m-qty').value):null,
+    unit:$('m-unit').value||'ks',
+    category:$('m-cat').value||null,
+    notes:$('m-notes').value.trim()||null,
+    tags:formTags,
+    archived:false,
+    updatedAt:new Date().toISOString()
+  };
+  const btn=$('save-btn');btn.disabled=true;btn.textContent='Ukládám…';
+  try {
+    if (editingId) await updateDoc(doc(db,'medicines',editingId),data);
+    else { data.createdAt=new Date().toISOString(); await addDoc(collection(db,'medicines'),data); }
+    closeModal('modal-med');
+  } catch(e) { alert('Chyba: '+e.message); }
+  btn.disabled=false; btn.textContent='Uložit';
+};
+
+// ── Archive / Restore ────────────────────────────
+window.doArchive = async id => {
+  await updateDoc(doc(db,'medicines',id), {archived:true});
+};
+window.doRestore = async id => {
+  await updateDoc(doc(db,'medicines',id), {archived:false});
+};
+
+// ── Delete ──────────────────────────────────────
+window.askDelete = id => {
+  pendingDeleteId=id;
+  $('del-name').textContent=medicines.find(m=>m.id===id)?.name||'tento lék';
+  openModal('modal-confirm');
+};
+window.doDelete = async () => {
+  if(!pendingDeleteId) return;
+  try { await deleteDoc(doc(db,'medicines',pendingDeleteId)); closeModal('modal-confirm'); }
+  catch(e) { alert('Chyba: '+e.message); }
+  pendingDeleteId=null;
+};
+
+// ── Settings ─────────────────────────────────────
+window.openSettings = () => openModal('modal-settings');
+window.saveSettings = async () => {
+  settings.expiryWarningDays = parseInt($('s-expiry').value)||10;
+  settings.lowQtyThreshold   = parseInt($('s-lowqty').value)||3;
+  await saveSettingsToDB();
+  renderAll();
+  closeModal('modal-settings');
+};
+
+// ── Archive toggle ───────────────────────────────
+window.toggleArchive = () => {
+  showArchive=!showArchive;
+  const btn=$('arch-btn');
+  btn.classList.toggle('active',showArchive);
+  btn.textContent = showArchive ? '🗃️ Skrýt archiv' : '🗃️ Zobrazit archiv';
+  renderMeds();
+};
+
+// ── Modal helpers ────────────────────────────────
+function openModal(id) {
+  const el=$(id); el.style.display='flex';
+  requestAnimationFrame(()=>el.classList.add('open'));
+}
+function closeModal(id) {
+  const el=$(id); el.classList.remove('open');
+  setTimeout(()=>el.style.display='none',200);
+}
+window.closeModal=closeModal;
+document.addEventListener('click',e=>{
+  if(e.target.classList.contains('modal-bg')) closeModal(e.target.id);
+});
+
+// ── Boot ────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  $('search').addEventListener('input',e=>{searchQ=e.target.value;renderMeds();renderDashboard();});
+  $('cat-filter').addEventListener('change',e=>{filterCat=e.target.value;renderMeds();renderDashboard();});
+  document.querySelectorAll('.stab').forEach(t=>t.onclick=()=>{
+    filterStatus=t.dataset.s; renderStatusTabs(); renderMeds(); renderDashboard();
+  });
+  $('new-tag').addEventListener('keydown',e=>{if(e.key==='Enter')window.addTagInput();});
+  renderStatusTabs();
+  renderTagRow();
+  renderTagToggles();
+  renderTagMgmt();
+  $('med-grid').innerHTML='<div class="loader"><div class="spinner"></div> Načítám z Firebase…</div>';
+  init();
+});
+</script>
+
+<!-- ══════════════════════════════════════════════ -->
+<!--  LAYOUT                                        -->
+<!-- ══════════════════════════════════════════════ -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">💊</div>
+    <div>
+      MedBox
+      <span class="sub">Rodinná lékárnička</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="btn btn-ghost" onclick="openSettings()">⚙️ Nastavení</button>
+    <button class="btn btn-primary" onclick="openAdd()">+ Přidat lék</button>
+  </div>
+</header>
+
+<main>
+  <!-- Dashboard -->
+  <div class="dashboard">
+    <div class="stat-card c-green">
+      <div class="stat-num green" id="d-total">—</div>
+      <div class="stat-label">Celkem léků</div>
+    </div>
+    <div class="stat-card c-red">
+      <div class="stat-num red" id="d-expired">—</div>
+      <div class="stat-label">Prošlých</div>
+    </div>
+    <div class="stat-card c-yellow">
+      <div class="stat-num yellow" id="d-expiring">—</div>
+      <div class="stat-label">Brzy expiruje</div>
+    </div>
+    <div class="stat-card c-blue">
+      <div class="stat-num blue" id="d-low">—</div>
+      <div class="stat-label">Dochází</div>
+    </div>
+  </div>
+
+  <!-- Alerts -->
+  <div class="alerts">
+    <div id="al-expired" class="alert-bar alert-expired" style="display:none">
+      <span class="alert-icon">🚨</span>
+      <div class="alert-content">
+        <h4>Prošlé léky — zkontroluj a vyhoď!</h4>
+        <ul class="alert-list"></ul>
+      </div>
+    </div>
+    <div id="al-expiring" class="alert-bar alert-expiring" style="display:none">
+      <span class="alert-icon">⏳</span>
+      <div class="alert-content">
+        <h4>Léky brzy expirují</h4>
+        <ul class="alert-list"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shopping list -->
+  <div id="shop-panel" class="shop-panel" style="display:none">
+    <h3>🛒 Nákupní seznam <span style="font-size:12px;color:var(--muted);font-family:'Sora',sans-serif;font-weight:400">(léky s nízkým množstvím)</span></h3>
+    <div id="shop-items"></div>
+    <button id="copy-shop-btn" class="btn btn-ghost btn-sm copy-btn" onclick="copyShopList()">📋 Kopírovat seznam</button>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="si">🔍</span>
+      <input id="search" type="text" placeholder="Hledat lék…">
+    </div>
+    <select class="filter-select" id="cat-filter">
+      <option value="vše">Všechny kategorie</option>
+      <option>analgetika</option><option>antibiotika</option><option>alergie</option>
+      <option>nachlazení</option><option>trávení</option><option>vitamíny</option>
+      <option>obvazový materiál</option><option>jiné</option>
+    </select>
+    <button id="arch-btn" class="arch-toggle" onclick="toggleArchive()">🗃️ Zobrazit archiv</button>
+  </div>
+
+  <!-- Status tabs -->
+  <div class="status-tabs">
+    <span class="stab" data-s="vše">Vše</span>
+    <span class="stab" data-s="ok">✓ V pořádku</span>
+    <span class="stab" data-s="expiring">⏳ Brzy expiruje</span>
+    <span class="stab" data-s="expired">⚠ Prošlé</span>
+  </div>
+
+  <!-- Tag filter -->
+  <div id="tag-row" class="tag-row"></div>
+
+  <!-- Section header -->
+  <div class="section-header">
+    <div class="section-title">Léky v lékárničce</div>
+  </div>
+
+  <!-- Grid -->
+  <div id="med-grid" class="med-grid"></div>
+</main>
+
+<!-- ══ Modal: Add/Edit ══ -->
+<div id="modal-med" class="modal-bg" style="display:none">
+  <div class="modal">
+    <div class="modal-title"><span class="dot"></span><span id="mtitle">Přidat lék</span></div>
+    <div class="fg">
+      <div class="ff full">
+        <label>Název léku *</label>
+        <input id="m-name" type="text" placeholder="např. Paralen 500">
+      </div>
+      <div class="ff">
+        <label>Datum expirace</label>
+        <input id="m-expiry" type="date">
+      </div>
+      <div class="ff">
+        <label>Datum otevření</label>
+        <input id="m-opened" type="date">
+      </div>
+      <div class="ff">
+        <label>Množství</label>
+        <input id="m-qty" type="number" min="0" placeholder="10">
+      </div>
+      <div class="ff">
+        <label>Jednotka</label>
+        <select id="m-unit">
+          <option value="ks">ks (tabletky)</option>
+          <option value="ml">ml</option>
+          <option value="g">g</option>
+          <option value="balení">balení</option>
+          <option value="ampule">ampule</option>
+          <option value="náplast">náplast</option>
+        </select>
+      </div>
+      <div class="ff full">
+        <label>Kategorie</label>
+        <select id="m-cat">
+          <option value="">— nevybráno —</option>
+          <option>analgetika</option><option>antibiotika</option><option>alergie</option>
+          <option>nachlazení</option><option>trávení</option><option>vitamíny</option>
+          <option>obvazový materiál</option><option>jiné</option>
+        </select>
+      </div>
+      <div class="ff full">
+        <label>Pro koho</label>
+        <div id="tag-toggles" class="tag-toggles"></div>
+      </div>
+      <div class="ff full">
+        <label>Poznámka / dávkování</label>
+        <textarea id="m-notes" placeholder="např. max. 3× denně, jen na předpis…"></textarea>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-med')">Zrušit</button>
+      <button id="save-btn" class="btn btn-primary" onclick="saveMed()">Uložit</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal: Confirm delete ══ -->
+<div id="modal-confirm" class="modal-bg" style="display:none">
+  <div class="modal" style="max-width:380px">
+    <div class="conf-body">
+      <div class="conf-icon">🗑️</div>
+      <h3>Smazat lék?</h3>
+      <p>Opravdu smazat <strong id="del-name"></strong>?<br>Tato akce je nevratná. Zvažte archivaci.</p>
+    </div>
+    <div class="form-actions" style="justify-content:center">
+      <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">Zrušit</button>
+      <button class="btn btn-danger" onclick="doDelete()">Smazat</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal: Settings ══ -->
+<div id="modal-settings" class="modal-bg" style="display:none">
+  <div class="modal">
+    <div class="modal-title"><span class="dot"></span>Nastavení</div>
+
+    <div class="sset-section">
+      <h3>Upozornění</h3>
+      <div class="sset-row">
+        <div>
+          <label>Varovat X dní před expirací</label>
+          <div class="hint">Globálně pro všechny léky</div>
+        </div>
+        <input id="s-expiry" type="number" min="1" max="365" value="10">
+      </div>
+      <div class="sset-row">
+        <div>
+          <label>Nákupní seznam — práh množství</label>
+          <div class="hint">Zobrazit v nákupním seznamu když qty ≤ X</div>
+        </div>
+        <input id="s-lowqty" type="number" min="0" max="99" value="3">
+      </div>
+    </div>
+
+    <div class="sset-section">
+      <h3>Štítky (tagy)</h3>
+      <div id="tag-mgmt" class="tag-mgmt"></div>
+      <div class="add-tag-row">
+        <input id="new-tag" type="text" placeholder="Nový štítek…">
+        <button class="btn btn-primary btn-sm" onclick="addTagInput()">Přidat</button>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-settings')">Zavřít</button>
+      <button class="btn btn-primary" onclick="saveSettings()">Uložit</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
